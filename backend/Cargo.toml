@@ -7,7 +7,14 @@ edition = "2021"
 
 [dependencies]
 actix-web = "4"
+r2d2 = "0.8"
+diesel = { version = "2", features = ["postgres", "uuid", "r2d2"] }
 serde = { version = "1", features = ["derive"] }
 config = { version = "0.13", features = ["yaml"] }
 uuid = { version = "1", features = ["v4", "serde"]}
 validator = { version = "0.16", features = ["derive"] }
+bcrypt = "0.15.0"
+thiserror = "1"
+anyhow = "1"
+env_logger = "0.10.1"
+log = "0.4.20"
