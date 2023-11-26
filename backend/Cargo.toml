@@ -10,3 +10,4 @@ actix-web = "4"
 serde = { version = "1", features = ["derive"] }
 config = { version = "0.13", features = ["yaml"] }
 uuid = { version = "1", features = ["v4", "serde"]}
+validator = { version = "0.16", features = ["derive"] }
