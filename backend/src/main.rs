@@ -1,4 +1,5 @@
-use actix_web::{get, App, HttpResponse, HttpServer, Responder};
+use actix_web::{App, HttpServer, web};
+use backend::api::routes::register;
 use backend::configuration;
 
 #[actix_web::main]
@@ -7,14 +8,12 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(|| {
         App::new()
-            .service(hello)
+            .service(
+                web::scope("api/users")
+                    .route("register", web::post().to(register))
+            )
     })
         .bind((configuration.application.host, configuration.application.port))?
         .run()
         .await
-}
-
-#[get("/")]
-async fn hello() -> impl Responder {
-    HttpResponse::Ok().body("Hello world!")
 }
