@@ -58,9 +58,11 @@ pub struct RegisterUserResponse {
     pub user: User,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct LoginUserRequest {
+    #[validate(email(message = "email must be in a valid format"))]
     pub email: String,
+    #[validate(length(min = 1, message = "please enter a password"))]
     pub password: String,
 }
 

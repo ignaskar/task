@@ -6,7 +6,7 @@ use crate::entities::User;
 use super::Service;
 
 impl Service {
-    pub fn register_user(&self, request: contracts::RegisterUserRequest) -> Result<User, anyhow::Error> {
+    pub fn register(&self, request: contracts::RegisterUserRequest) -> Result<User, anyhow::Error> {
         let password_hash_result = hash_password(request.password);
 
         let password_hash = match password_hash_result {
@@ -27,6 +27,10 @@ impl Service {
         let user = self.repo.insert_user(&self.db_pool, to_insert)?;
 
         Ok(user)
+    }
+
+    pub fn get_users(&self) -> Result<Vec<User>, anyhow::Error> {
+        self.repo.get_users(&self.db_pool)
     }
 }
 

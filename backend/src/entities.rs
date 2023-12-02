@@ -21,3 +21,13 @@ impl From<User> for contracts::User {
         }
     }
 }
+
+impl<'a> From<&'a User> for contracts::User {
+    fn from(value: &'a User) -> Self {
+        Self {
+            id: value.id,
+            name: value.name.clone(),
+            email: value.email.clone(),
+        }
+    }
+}
