@@ -17,7 +17,7 @@ impl From<User> for contracts::User {
         Self {
             id: value.id,
             name: value.name,
-            email: value.email
+            email: value.email,
         }
     }
 }

@@ -1,5 +1,5 @@
 use actix_web::{App, HttpServer, web};
-use actix_web::middleware::Logger;
+use actix_web::middleware::{Logger, NormalizePath, TrailingSlash};
 use actix_web::web::Data;
 use diesel::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
@@ -7,9 +7,9 @@ use env_logger::Env;
 use backend::{
     api::routes::register,
     configuration,
-    service::Service
+    service::Service,
 };
-use backend::api::routes::get_users;
+use backend::api::routes::{get_users, login};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -26,10 +26,12 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
+            .wrap(NormalizePath::new(TrailingSlash::Always))
             .service(
                 web::scope("users")
-                    .route("", web::get().to(get_users))
-                    .route("register", web::post().to(register))
+                    .route("/", web::get().to(get_users))
+                    .route("register/", web::post().to(register))
+                    .route("login/", web::post().to(login))
             )
             .app_data(Data::new(service.clone()))
     })

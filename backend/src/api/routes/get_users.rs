@@ -9,9 +9,9 @@ pub async fn get_users(service: web::Data<Service>) -> impl Responder {
     let users = match get_users_result {
         Ok(users) => users,
         Err(_) => {
-            return HttpResponse::InternalServerError().json(contracts::Response::<()>::err(vec![contracts::Error{
+            return HttpResponse::InternalServerError().json(contracts::Response::<()>::err(vec![contracts::Error {
                 message: "Internal server error".to_string()
-            }]))
+            }]));
         }
     };
 
