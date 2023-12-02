@@ -9,6 +9,7 @@ use backend::{
     configuration,
     service::Service
 };
+use backend::api::routes::get_users;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -27,6 +28,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(Logger::default())
             .service(
                 web::scope("users")
+                    .route("", web::get().to(get_users))
                     .route("register", web::post().to(register))
             )
             .app_data(Data::new(service.clone()))

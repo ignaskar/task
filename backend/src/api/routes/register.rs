@@ -13,7 +13,7 @@ pub async fn register(service: web::Data<Service>, request: Json<RegisterUserReq
     let inner = request.into_inner();
     validate_request(&inner)?;
 
-    let user = service.register_user(inner)?;
+    let user = service.register(inner)?;
     let response = contracts::Response::ok(RegisterUserResponse { user: user.into() });
 
     Ok(HttpResponse::Ok().json(response))
