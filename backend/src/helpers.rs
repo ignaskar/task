@@ -9,7 +9,7 @@ pub fn validate_request<'de, T>(request: &T) -> Result<(), ValidationError>
     if let Err(e) = request.validate() {
         let err = ValidationError(e);
         warn!("failed to validate incoming request. reason: {:?}", err);
-        return Err(err)
+        return Err(err);
     }
 
     Ok(())

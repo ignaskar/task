@@ -33,9 +33,7 @@ impl RegistrationError {
             RegistrationError::Validation(err) => {
                 err.get_validation_errors()
             }
-            _ => {
-                vec![contracts::Error { message: "Internal server error".to_string() }]
-            }
+            _ => vec![contracts::Error { message: "Internal server error".to_string() }]
         }
     }
 }
