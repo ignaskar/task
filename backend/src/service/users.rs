@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Context};
+use anyhow::Context;
 use log::error;
 use thiserror::Error;
 use uuid::Uuid;
@@ -7,14 +7,14 @@ use crate::entities::User;
 use super::Service;
 
 impl Service {
-    pub fn register(&self, request: contracts::RegisterUserRequest) -> Result<User, anyhow::Error> {
+    pub fn register(&self, request: contracts::RegisterUserRequest) -> Result<User, ServiceError> {
         let password_hash_result = hash_password(request.password);
 
         let password_hash = match password_hash_result {
             Ok(p) => p,
             Err(e) => {
                 error!("{}", e);
-                return Err(e);
+                return Err(ServiceError::Internal(e));
             }
         };
 
@@ -25,7 +25,24 @@ impl Service {
             password_hash,
         };
 
-        let user = self.repo.insert_user(&self.db_pool, to_insert)?;
+        let user = match self.repo.insert_user(&self.db_pool, to_insert) {
+            Ok(u) => u,
+            Err(e) => {
+                if let Some(source) = e.source() {
+                    if let Some(diesel_err) = source.downcast_ref::<diesel::result::Error>() {
+                        return match diesel_err {
+                            diesel::result::Error::DatabaseError(diesel::result::DatabaseErrorKind::UniqueViolation, _) => {
+                                Err(ServiceError::EmailAlreadyExists)
+                            },
+                            _ => Err(ServiceError::Internal(e))
+                        }
+                    }
+                }
+
+                error!("{}", e);
+                return Err(ServiceError::Internal(e))
+            }
+        };
 
         Ok(user)
     }
@@ -59,6 +76,14 @@ fn compare_hash_and_password(password: String, hash_bytes: Vec<u8>) -> Result<bo
     let verification_result = bcrypt::verify(password, hash_as_str)
         .context("failed to verify hash with password")?;
     Ok(verification_result)
+}
+
+#[derive(Error, Debug)]
+pub enum ServiceError {
+    #[error("email already exists")]
+    EmailAlreadyExists,
+    #[error(transparent)]
+    Internal(#[from] anyhow::Error)
 }
 
 #[derive(Error, Debug)]

@@ -16,7 +16,10 @@ impl Repository {
             .values(&to_insert)
             .returning(User::as_returning())
             .get_result(&mut conn)
-            .map_err(log_error_with_context)
+            .map_err(|diesel_error| {
+                let err = log_error_with_context(diesel_error);
+                anyhow::Error::from(err)
+            })
             .context("failed to insert new user to DB");
 
         match insert_result {
