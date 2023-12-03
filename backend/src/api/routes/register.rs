@@ -31,13 +31,9 @@ pub enum RegistrationError {
 impl RegistrationError {
     fn get_errors(&self) -> Vec<contracts::Error> {
         match self {
-            RegistrationError::Validation(err) => {
-                err.get_validation_errors()
-            },
-            RegistrationError::Service(e) => match e {
-                ServiceError::EmailAlreadyExists => vec![contracts::Error { message: "email already exists".to_string() }],
-                ServiceError::Internal(_) => vec![contracts::Error { message: "Internal server error".to_string() }]
-            }
+            RegistrationError::Validation(err) => err.get_validation_errors(),
+            RegistrationError::Service(ServiceError::EmailAlreadyExists) => vec![contracts::Error { message: "email already exists".to_string() }],
+            RegistrationError::Service(ServiceError::Internal(_)) => vec![contracts::Error { message: "Internal server error".to_string() }]
         }
     }
 }
@@ -46,12 +42,8 @@ impl ResponseError for RegistrationError {
     fn status_code(&self) -> StatusCode {
         match self {
             RegistrationError::Validation(_) => StatusCode::BAD_REQUEST,
-            RegistrationError::Service(e) => {
-                match e {
-                    ServiceError::EmailAlreadyExists => StatusCode::CONFLICT,
-                    ServiceError::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR
-                }
-            }
+            RegistrationError::Service(ServiceError::EmailAlreadyExists) => StatusCode::CONFLICT,
+            RegistrationError::Service(ServiceError::Internal(_)) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 

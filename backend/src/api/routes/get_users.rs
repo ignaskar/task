@@ -4,9 +4,7 @@ use crate::api::contracts::GetUsersResponse;
 use crate::service::Service;
 
 pub async fn get_users(service: web::Data<Service>) -> impl Responder {
-    let get_users_result = service.get_users();
-
-    let users = match get_users_result {
+    let users = match service.get_users() {
         Ok(users) => users,
         Err(_) => {
             return HttpResponse::InternalServerError().json(contracts::Response::<()>::err(vec![contracts::Error {
