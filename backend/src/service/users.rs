@@ -25,26 +25,15 @@ impl Service {
             password_hash,
         };
 
-        let user = match self.repo.insert_user(&self.db_pool, to_insert) {
-            Ok(u) => u,
-            Err(e) => {
-                if let Some(source) = e.source() {
-                    if let Some(diesel_err) = source.downcast_ref::<diesel::result::Error>() {
-                        return match diesel_err {
-                            diesel::result::Error::DatabaseError(diesel::result::DatabaseErrorKind::UniqueViolation, _) => {
-                                Err(ServiceError::EmailAlreadyExists)
-                            },
-                            _ => Err(ServiceError::Internal(e))
-                        }
-                    }
-                }
-
+        self.repo.insert_user(&self.db_pool, to_insert).map_err(|e| match e.source() {
+            Some(source) if source.downcast_ref::<diesel::result::Error>()
+                .map(|err| matches!(err, diesel::result::Error::DatabaseError(diesel::result::DatabaseErrorKind::UniqueViolation, _)))
+                .unwrap_or(false) => ServiceError::EmailAlreadyExists,
+            _ => {
                 error!("{}", e);
-                return Err(ServiceError::Internal(e))
+                ServiceError::Internal(e)
             }
-        };
-
-        Ok(user)
+        })
     }
 
     pub fn login(&self, request: contracts::LoginUserRequest) -> Result<(), AuthError> {
@@ -72,7 +61,8 @@ fn hash_password(password: String) -> Result<Vec<u8>, anyhow::Error> {
 }
 
 fn compare_hash_and_password(password: String, hash_bytes: Vec<u8>) -> Result<bool, anyhow::Error> {
-    let hash_as_str = std::str::from_utf8(&hash_bytes)?;
+    let hash_as_str = std::str::from_utf8(&hash_bytes)
+        .context("failed to convert hash bytes to string")?;
     let verification_result = bcrypt::verify(password, hash_as_str)
         .context("failed to verify hash with password")?;
     Ok(verification_result)

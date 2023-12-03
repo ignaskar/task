@@ -33,7 +33,7 @@ impl RegistrationError {
         match self {
             RegistrationError::Validation(err) => err.get_validation_errors(),
             RegistrationError::Service(ServiceError::EmailAlreadyExists) => vec![contracts::Error { message: "email already exists".to_string() }],
-            RegistrationError::Service(ServiceError::Internal(_)) => vec![contracts::Error { message: "Internal server error".to_string() }]
+            RegistrationError::Service(ServiceError::Internal(_)) => vec![contracts::Error { message: "internal server error".to_string() }]
         }
     }
 }
