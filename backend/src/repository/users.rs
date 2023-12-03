@@ -1,4 +1,4 @@
-use anyhow::{Context, Error};
+use anyhow::Context;
 use diesel::{ExpressionMethods, OptionalExtension, PgConnection, QueryDsl, RunQueryDsl, SelectableHelper};
 use diesel::r2d2::{ConnectionManager, Pool};
 use log::error;
