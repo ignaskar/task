@@ -1,9 +1,9 @@
 use actix_web::{HttpResponse, Responder, web};
 use crate::api::contracts;
 use crate::api::contracts::GetUsersResponse;
-use crate::service::Service;
+use crate::service::UserService;
 
-pub async fn get_users(service: web::Data<Service>) -> impl Responder {
+pub async fn get_users(service: web::Data<UserService>) -> impl Responder {
     let users = match service.get_users() {
         Ok(users) => users,
         Err(_) => {

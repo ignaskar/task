@@ -8,3 +8,7 @@ database:
   username: "postgres"
   password: "password"
   require_ssl: false
+authentication:
+  secret_key: "wow such secret no one will guess amirite. but this is too short so we have to go loooooonger"
+  audience: "task"
+  token_expiration_in_seconds: 60

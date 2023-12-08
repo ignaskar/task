@@ -4,12 +4,20 @@ use serde::Deserialize;
 pub struct Settings {
     pub application: ApplicationSettings,
     pub database: DatabaseSettings,
+    pub authentication: AuthenticationSettings,
 }
 
 #[derive(Deserialize, Clone)]
 pub struct ApplicationSettings {
     pub port: u16,
     pub host: String,
+}
+
+#[derive(Deserialize, Clone)]
+pub struct AuthenticationSettings {
+    pub secret_key: String,
+    pub audience: String,
+    pub token_expiration_in_seconds: u64
 }
 
 #[derive(Deserialize, Clone)]

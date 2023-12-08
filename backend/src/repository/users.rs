@@ -1,15 +1,22 @@
+use super::Repository;
+use crate::models::user::User;
+use crate::schema::users;
+use crate::schema::users::{email, id, password_hash};
 use anyhow::Context;
-use diesel::{ExpressionMethods, OptionalExtension, PgConnection, QueryDsl, RunQueryDsl, SelectableHelper};
 use diesel::r2d2::{ConnectionManager, Pool};
+use diesel::{
+    ExpressionMethods, OptionalExtension, PgConnection, QueryDsl, RunQueryDsl, SelectableHelper,
+};
 use log::error;
 use r2d2::PooledConnection;
-use crate::entities::User;
-use super::Repository;
-use crate::schema::users;
-use crate::schema::users::{email, password_hash};
+use uuid::Uuid;
 
 impl Repository {
-    pub fn insert_user(&self, db_pool: &Pool<ConnectionManager<PgConnection>>, to_insert: User) -> Result<User, anyhow::Error> {
+    pub fn insert_user(
+        &self,
+        db_pool: &Pool<ConnectionManager<PgConnection>>,
+        to_insert: User,
+    ) -> Result<User, anyhow::Error> {
         let mut conn = get_connection_from_pool(db_pool)?;
 
         let insert_result = diesel::insert_into(users::table)
@@ -31,19 +38,23 @@ impl Repository {
         }
     }
 
-    pub fn get_stored_credentials(&self, email_: String, db_pool: &Pool<ConnectionManager<PgConnection>>) -> Result<Option<Vec<u8>>, anyhow::Error> {
+    pub fn get_stored_credentials(
+        &self,
+        email_: String,
+        db_pool: &Pool<ConnectionManager<PgConnection>>,
+    ) -> Result<Option<(Uuid, Vec<u8>)>, anyhow::Error> {
         let mut conn = get_connection_from_pool(db_pool)?;
 
         let get_result = users::table
-            .select(password_hash)
+            .select((id, password_hash))
             .filter(email.eq(email_))
-            .first::<Vec<u8>>(&mut conn)
+            .first::<(Uuid, Vec<u8>)>(&mut conn)
             .optional()
             .map_err(log_error_with_context)
             .context("failed to retrieve password hash from DB");
 
         match get_result {
-            Ok(maybe_hash) => Ok(maybe_hash),
+            Ok(maybe_data) => Ok(maybe_data),
             Err(e) => {
                 error!("{}", e);
                 Err(e)
@@ -51,7 +62,10 @@ impl Repository {
         }
     }
 
-    pub fn get_users(&self, db_pool: &Pool<ConnectionManager<PgConnection>>) -> Result<Vec<User>, anyhow::Error> {
+    pub fn get_users(
+        &self,
+        db_pool: &Pool<ConnectionManager<PgConnection>>,
+    ) -> Result<Vec<User>, anyhow::Error> {
         let mut conn = get_connection_from_pool(db_pool)?;
 
         let get_result = users::table
@@ -70,8 +84,11 @@ impl Repository {
     }
 }
 
-fn get_connection_from_pool(db_pool: &Pool<ConnectionManager<PgConnection>>) -> Result<PooledConnection<ConnectionManager<PgConnection>>, anyhow::Error> {
-    let conn_result = db_pool.get()
+fn get_connection_from_pool(
+    db_pool: &Pool<ConnectionManager<PgConnection>>,
+) -> Result<PooledConnection<ConnectionManager<PgConnection>>, anyhow::Error> {
+    let conn_result = db_pool
+        .get()
         .context("failed to get a connection from DB pool");
 
     match conn_result {

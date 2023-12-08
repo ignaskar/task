@@ -1,7 +1,8 @@
-pub mod configuration;
 pub mod api;
+pub mod configuration;
 pub mod helpers;
-pub mod entities;
+pub mod models;
+pub mod repository;
 pub mod schema;
 pub mod service;
-pub mod repository;
+pub mod middleware;
