@@ -44,8 +44,7 @@ impl UserService {
                 return Err(AuthError::InvalidCredentials);
             }
 
-            let token = auth_service.generate_token(user_id)
-                .map_err(|_| AuthError::InvalidCredentials)?;
+            let token = auth_service.generate_token(user_id)?;
 
             return Ok(token);
         }
