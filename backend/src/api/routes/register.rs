@@ -7,10 +7,10 @@ use crate::api::contracts;
 use crate::api::contracts::{RegisterUserRequest, RegisterUserResponse};
 use crate::helpers;
 use crate::helpers::validate_request;
-use crate::service::Service;
+use crate::service::UserService;
 use crate::service::users::ServiceError;
 
-pub async fn register(service: web::Data<Service>, request: Json<RegisterUserRequest>) -> Result<impl Responder, RegistrationError> {
+pub async fn register(service: web::Data<UserService>, request: Json<RegisterUserRequest>) -> Result<impl Responder, RegistrationError> {
     let inner = request.into_inner();
     validate_request(&inner)?;
 

@@ -1,6 +1,6 @@
+use crate::api::contracts;
 use diesel::prelude::*;
 use uuid::Uuid;
-use crate::api::contracts;
 
 #[derive(Queryable, Selectable, Insertable)]
 #[diesel(table_name = crate::schema::users)]

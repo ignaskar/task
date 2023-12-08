@@ -1,12 +1,13 @@
+use std::sync::Arc;
 use anyhow::Context;
 use log::error;
 use thiserror::Error;
 use uuid::Uuid;
 use crate::api::contracts;
-use crate::entities::User;
-use super::Service;
+use crate::models::user::User;
+use super::{AuthService, UserService};
 
-impl Service {
+impl UserService {
     pub fn register(&self, request: contracts::RegisterUserRequest) -> Result<User, ServiceError> {
         let password_hash_result = hash_password(request.password);
 
@@ -36,14 +37,17 @@ impl Service {
         })
     }
 
-    pub fn login(&self, request: contracts::LoginUserRequest) -> Result<(), AuthError> {
-        if let Some(hash_bytes) = self.repo.get_stored_credentials(request.email, &self.db_pool)? {
+    pub fn login(&self, auth_service: Arc<AuthService>, request: contracts::LoginUserRequest) -> Result<String, AuthError> {
+        if let Some((user_id, hash_bytes)) = self.repo.get_stored_credentials(request.email, &self.db_pool)? {
             let is_matching = compare_hash_and_password(request.password, hash_bytes)?;
             if !is_matching {
                 return Err(AuthError::InvalidCredentials);
             }
 
-            return Ok(());
+            let token = auth_service.generate_token(user_id)
+                .map_err(|_| AuthError::InvalidCredentials)?;
+
+            return Ok(token);
         }
 
         Err(AuthError::InvalidCredentials)

@@ -67,8 +67,9 @@ pub struct LoginUserRequest {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-// TODO [IK]: implement once auth mechanism is decided
-pub struct LoginUserResponse {}
+pub struct LoginUserResponse {
+    pub token: String
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct GetUsersResponse {
