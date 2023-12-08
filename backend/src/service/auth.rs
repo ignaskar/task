@@ -1,12 +1,14 @@
 use std::time::Duration;
+use anyhow::Context;
 use chrono::Utc;
 use jsonwebtoken::{Algorithm, decode, DecodingKey, encode, EncodingKey, Header, TokenData, Validation};
+use log::error;
 use uuid::Uuid;
 use crate::models::claims::Claims;
 use crate::service::AuthService;
 
 impl AuthService {
-    pub fn generate_token(&self, user_id: Uuid) -> Result<String, jsonwebtoken::errors::Error> {
+    pub fn generate_token(&self, user_id: Uuid) -> Result<String, anyhow::Error> {
         let now = Utc::now();
         let expires_in = now + Duration::from_secs(self.options.token_expiration_in_seconds);
 
@@ -21,6 +23,11 @@ impl AuthService {
             &Header::default(),
             &claims,
             &EncodingKey::from_secret(self.options.encoding_key.as_bytes()))
+            .map_err(|e| {
+                error!("{}", e.to_string());
+                e
+            })
+            .context("failed to encode JWT")
     }
 
     pub fn verify_token(&self, token: String) -> jsonwebtoken::errors::Result<TokenData<Claims>> {
