@@ -76,7 +76,7 @@ mod tests {
     const PASSWORD_VALIDATION_MESSAGE: &str = "please enter a password";
 
     #[test]
-    fn get_validation_errors_return_errors_when_validation_fails() {
+    fn get_validation_errors_should_return_errors_when_validation_fails() {
         // Arrange
 
         let request = TestLoginRequest {
@@ -120,7 +120,7 @@ mod tests {
     }
 
     #[test]
-    fn get_validation_error_message_returns_formatted_error_when_validation_fails() {
+    fn get_validation_error_message_should_return_formatted_error_when_validation_fails() {
         // Arrange
 
         let request = TestLoginRequest {
@@ -147,7 +147,7 @@ mod tests {
     }
 
     #[test]
-    fn validate_request_returns_result_with_error_when_validation_fails() {
+    fn validate_request_should_return_result_with_error_when_validation_fails() {
         // Arrange
 
         let request = TestLoginRequest {
@@ -165,7 +165,7 @@ mod tests {
     }
 
     #[test]
-    fn validate_request_returns_empty_result_when_validation_succeeds() {
+    fn validate_request_should_return_empty_result_when_validation_succeeds() {
         // Arrange
 
         let request = TestLoginRequest {
