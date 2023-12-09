@@ -17,7 +17,7 @@ Plain-old `cargo run` in `./backend/` will suffice here.
 
 Here are some example requests that you can send to test out the solution.
 
-`POST http://localhost:8000/auth/register`
+`POST http://localhost:8000/api/auth/register`
 ```json
 {
   "name": "ignas karpusenkovas",
@@ -26,7 +26,7 @@ Here are some example requests that you can send to test out the solution.
 }
 ```
 
-`POST http://localhost:8000/auth/login`
+`POST http://localhost:8000/api/auth/login`
 ```json
 {
   "email": "ignas.karpusenkovas@gmail.com",
@@ -36,4 +36,4 @@ Here are some example requests that you can send to test out the solution.
 
 The above `login` endpoint should return you a `token` which you can then use when getting the protected list of users.  
 
-When executing `GET http://localhost:8000/users`, do not forget to set an authorization header `Authorization: Bearer 'your token here without single quotes'`.
+When executing `GET http://localhost:8000/api/users`, do not forget to set an authorization header `Authorization: Bearer 'your token here without single quotes'`.
