@@ -106,7 +106,7 @@ fn unauthorized(error_message: String) -> actix_web::Error {
         HttpResponse::Unauthorized().json(contracts::Response::<()>::err(vec![contracts::Error {
             message: error_message.to_string(),
         }]));
-    let e = anyhow::anyhow!(error_message.to_string());
+    let e = anyhow!(error_message.to_string());
     InternalError::from_response(e, res).into()
 }
 
@@ -116,7 +116,7 @@ fn internal_server_error(error_message: String) -> actix_web::Error {
             message: error_message.to_string(),
         },
     ]));
-    let e = anyhow::anyhow!(error_message.to_string());
+    let e = anyhow!(error_message.to_string());
     InternalError::from_response(e, res).into()
 }
 
