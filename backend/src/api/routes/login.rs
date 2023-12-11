@@ -11,10 +11,10 @@ use crate::service::{AuthService, UserService};
 use crate::service::users::AuthError;
 
 pub async fn login(user_service: web::Data<UserService>, auth_service: web::Data<AuthService>, request: Json<LoginUserRequest>) -> Result<impl Responder, LoginError> {
-    let req = request.into_inner();
-    validate_request(&req)?;
+    let request = request.into_inner();
+    validate_request(&request)?;
 
-    let token = user_service.login(auth_service.into_inner(), req)?;
+    let token = user_service.login(auth_service.into_inner(), request)?;
 
     Ok(HttpResponse::Ok().json(contracts::Response::ok(LoginUserResponse {
         token
@@ -24,7 +24,7 @@ pub async fn login(user_service: web::Data<UserService>, auth_service: web::Data
 #[derive(Error, Debug)]
 pub enum LoginError {
     #[error("authentication failed")]
-    AuthError(#[from] AuthError),
+    Auth(#[from] AuthError),
     #[error("request validation failed")]
     Validation(#[from] helpers::ValidationError),
     #[error("internal server error")]
@@ -35,7 +35,7 @@ impl LoginError {
     fn get_errors(&self) -> Vec<contracts::Error> {
         match self {
             LoginError::Validation(e) => e.get_validation_errors(),
-            LoginError::AuthError(e) => vec![contracts::Error { message: e.to_string() }],
+            LoginError::Auth(e) => vec![contracts::Error { message: e.to_string() }],
             LoginError::Internal(_) => vec![contracts::Error { message: "Internal server error".to_string() }],
         }
     }
@@ -45,7 +45,7 @@ impl ResponseError for LoginError {
     fn status_code(&self) -> StatusCode {
         match self {
             LoginError::Validation(_) => StatusCode::BAD_REQUEST,
-            LoginError::AuthError(_) => StatusCode::UNAUTHORIZED,
+            LoginError::Auth(_) => StatusCode::UNAUTHORIZED,
             LoginError::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR
         }
     }
