@@ -57,7 +57,7 @@ where
             };
 
             match auth_service.verify_token(token) {
-                Ok(_) => service.call(req).await.map(|res| res.map_into_left_body()),
+                Ok(_) => service.call(req).await.map(ServiceResponse::map_into_left_body),
                 Err(e) => Ok(req
                     .error_response::<actix_web::Error>(unauthorized(e.to_string()))
                     .map_into_right_body()),

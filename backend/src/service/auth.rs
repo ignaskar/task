@@ -40,4 +40,18 @@ impl AuthService {
             &validation
         )
     }
+
+    pub fn hash_password(&self, password: String) -> Result<Vec<u8>, anyhow::Error> {
+        let hashed = bcrypt::hash(password, 12)
+            .context("failed to hash user's password")?;
+        Ok(hashed.as_bytes().to_vec())
+    }
+
+    pub fn compare_hash_and_password(&self, password: String, hash_bytes: Vec<u8>) -> Result<bool, anyhow::Error> {
+        let hash_as_str = std::str::from_utf8(&hash_bytes)
+            .context("failed to convert hash bytes to string")?;
+        let verification_result = bcrypt::verify(password, hash_as_str)
+            .context("failed to verify hash with password")?;
+        Ok(verification_result)
+    }
 }

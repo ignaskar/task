@@ -27,7 +27,7 @@ impl ValidationError {
             .flat_map(|errs| {
                 errs.iter().map(|err| {
                     let message = match err.clone().message {
-                        None => format!("{}", err),
+                        None => format!("{err}"),
                         Some(msg) => msg.to_string(),
                     };
 
@@ -44,11 +44,11 @@ impl ValidationError {
             .flat_map(|errs| {
                 errs.iter().map(|err| {
                     let message = match err.clone().message {
-                        None => format!("{}", err),
+                        None => format!("{err}"),
                         Some(msg) => msg.to_string(),
                     };
 
-                    format!("{}\n", message)
+                    format!("{message}\n")
                 })
             })
             .collect()

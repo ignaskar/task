@@ -1,5 +1,4 @@
 use std::sync::Arc;
-use anyhow::Context;
 use log::error;
 use thiserror::Error;
 use uuid::Uuid;
@@ -8,10 +7,8 @@ use crate::models::user::User;
 use super::{AuthService, UserService};
 
 impl UserService {
-    pub fn register(&self, request: contracts::RegisterUserRequest) -> Result<User, ServiceError> {
-        let password_hash_result = hash_password(request.password);
-
-        let password_hash = match password_hash_result {
+    pub fn register(&self, auth_service: Arc<AuthService>, request: contracts::RegisterUserRequest) -> Result<User, ServiceError> {
+        let password_hash = match auth_service.hash_password(request.password) {
             Ok(p) => p,
             Err(e) => {
                 error!("{}", e);
@@ -28,8 +25,7 @@ impl UserService {
 
         self.repo.insert_user(&self.db_pool, to_insert).map_err(|e| match e.source() {
             Some(source) if source.downcast_ref::<diesel::result::Error>()
-                .map(|err| matches!(err, diesel::result::Error::DatabaseError(diesel::result::DatabaseErrorKind::UniqueViolation, _)))
-                .unwrap_or(false) => ServiceError::EmailAlreadyExists,
+                .is_some_and(|err| matches!(err, diesel::result::Error::DatabaseError(diesel::result::DatabaseErrorKind::UniqueViolation, _))) => ServiceError::EmailAlreadyExists,
             _ => {
                 error!("{}", e);
                 ServiceError::Internal(e)
@@ -39,7 +35,7 @@ impl UserService {
 
     pub fn login(&self, auth_service: Arc<AuthService>, request: contracts::LoginUserRequest) -> Result<String, AuthError> {
         if let Some((user_id, hash_bytes)) = self.repo.get_stored_credentials(request.email, &self.db_pool)? {
-            let is_matching = compare_hash_and_password(request.password, hash_bytes)?;
+            let is_matching = auth_service.compare_hash_and_password(request.password, hash_bytes)?;
             if !is_matching {
                 return Err(AuthError::InvalidCredentials);
             }
@@ -55,20 +51,6 @@ impl UserService {
     pub fn get_users(&self) -> Result<Vec<User>, anyhow::Error> {
         self.repo.get_users(&self.db_pool)
     }
-}
-
-fn hash_password(password: String) -> Result<Vec<u8>, anyhow::Error> {
-    let hashed = bcrypt::hash(password, 12)
-        .context("failed to hash user's password")?;
-    Ok(hashed.as_bytes().to_vec())
-}
-
-fn compare_hash_and_password(password: String, hash_bytes: Vec<u8>) -> Result<bool, anyhow::Error> {
-    let hash_as_str = std::str::from_utf8(&hash_bytes)
-        .context("failed to convert hash bytes to string")?;
-    let verification_result = bcrypt::verify(password, hash_as_str)
-        .context("failed to verify hash with password")?;
-    Ok(verification_result)
 }
 
 #[derive(Error, Debug)]
