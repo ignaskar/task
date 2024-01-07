@@ -1,8 +1,9 @@
 pub mod api;
 pub mod configuration;
+pub mod errors;
 pub mod helpers;
+pub mod middleware;
 pub mod models;
 pub mod repository;
 pub mod schema;
 pub mod service;
-pub mod middleware;
