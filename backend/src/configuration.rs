@@ -17,7 +17,7 @@ pub struct ApplicationSettings {
 pub struct AuthenticationSettings {
     pub secret_key: String,
     pub audience: String,
-    pub token_expiration_in_seconds: u64
+    pub token_expiration_in_seconds: u64,
 }
 
 #[derive(Deserialize, Clone)]
@@ -32,22 +32,21 @@ pub struct DatabaseSettings {
 
 impl DatabaseSettings {
     pub fn get_connection_string(&self) -> String {
-        format!("postgres://{}:{}@{}:{}/{}",
-                self.username,
-                self.password,
-                self.host,
-                self.port,
-                self.database_name)
+        format!(
+            "postgres://{}:{}@{}:{}/{}",
+            self.username, self.password, self.host, self.port, self.database_name
+        )
     }
 }
 
 pub fn get_configuration() -> Result<Settings, config::ConfigError> {
-    let base_path = std::env::current_dir().expect("configuration.rs - unable to determine current directory");
+    let base_path =
+        std::env::current_dir().expect("configuration.rs - unable to determine current directory");
     let configuration_directory = base_path.join("configuration");
 
     let settings = config::Config::builder()
         .add_source(config::File::from(
-            configuration_directory.join("base.yaml")
+            configuration_directory.join("base.yaml"),
         ))
         .build()?;
 
