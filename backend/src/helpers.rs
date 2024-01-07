@@ -1,17 +1,18 @@
 use crate::api::contracts;
+use crate::errors::Error;
 use log::warn;
 use serde::Deserialize;
 use std::fmt::{Debug, Display, Formatter};
 use validator::{Validate, ValidationErrors};
 
-pub fn validate_request<'de, T>(request: &T) -> Result<(), ValidationError>
+pub fn validate_request<'de, T>(request: &T) -> Result<(), Error>
 where
     T: Deserialize<'de> + Validate,
 {
     if let Err(e) = request.validate() {
         let err = ValidationError(e);
         warn!("failed to validate incoming request. reason: {:?}", err);
-        return Err(err);
+        return Err(Error::Validation(err));
     }
 
     Ok(())
