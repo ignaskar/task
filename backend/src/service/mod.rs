@@ -1,9 +1,9 @@
-use diesel::PgConnection;
-use diesel::r2d2::{ConnectionManager, Pool};
 use crate::repository::Repository;
+use diesel::r2d2::{ConnectionManager, Pool};
+use diesel::PgConnection;
 
-pub mod users;
 pub mod auth;
+pub mod users;
 
 #[derive(Debug, Clone)]
 pub struct UserService {
@@ -13,21 +13,19 @@ pub struct UserService {
 
 #[derive(Debug, Clone)]
 pub struct AuthService {
-    options: AuthOptions
+    options: AuthOptions,
 }
 
 #[derive(Debug, Clone)]
 pub struct AuthOptions {
     pub encoding_key: String,
     pub audience: String,
-    pub token_expiration_in_seconds: u64
+    pub token_expiration_in_seconds: u64,
 }
 
 impl AuthService {
     pub fn new(options: AuthOptions) -> Self {
-        Self {
-            options
-        }
+        Self { options }
     }
 }
 
